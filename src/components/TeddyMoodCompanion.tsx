@@ -7,40 +7,93 @@ import { Heart } from 'lucide-react';
 type Mood = 'calm' | 'happy' | 'sad' | 'anxious' | 'angry' | 'confused' | null;
 
 const moodKeywords: Record<Exclude<Mood, null>, string[]> = {
-  calm: ['okay', 'fine', 'chill', 'relaxed', 'peaceful', 'good', 'alright', 'neutral', 'meh'],
-  happy: ['happy', 'excited', 'great', 'amazing', 'wonderful', 'love', 'yay', 'omg', 'best', 'awesome', 'joy', 'fun'],
-  sad: ['sad', 'crying', 'hurt', 'lonely', 'tired', 'exhausted', 'miss', 'broken', 'pain', 'empty', 'numb', 'depressed'],
-  anxious: ['anxious', 'worried', 'scared', 'overthinking', 'panic', 'nervous', 'stress', 'afraid', 'what if', 'cant stop thinking'],
-  angry: ['angry', 'mad', 'frustrated', 'annoyed', 'irritated', 'hate', 'upset', 'furious', 'pissed'],
-  confused: ['confused', 'unsure', 'idk', 'dont know', "don't know", 'mixed', 'unclear', 'lost', 'weird', 'strange']
+  calm: ['okay', 'fine', 'chill', 'relaxed', 'peaceful', 'good', 'alright', 'neutral', 'meh', 'content', 'steady'],
+  happy: ['happy', 'excited', 'great', 'amazing', 'wonderful', 'love', 'yay', 'omg', 'best', 'awesome', 'joy', 'fun', 'grateful', 'blessed', 'thrilled'],
+  sad: ['sad', 'crying', 'hurt', 'lonely', 'tired', 'exhausted', 'miss', 'broken', 'pain', 'empty', 'numb', 'depressed', 'heartbroken', 'alone', 'hopeless'],
+  anxious: ['anxious', 'worried', 'scared', 'overthinking', 'panic', 'nervous', 'stress', 'afraid', 'what if', 'cant stop thinking', 'restless', 'uneasy'],
+  angry: ['angry', 'mad', 'frustrated', 'annoyed', 'irritated', 'hate', 'upset', 'furious', 'pissed', 'rage', 'bitter'],
+  confused: ['confused', 'unsure', 'idk', 'dont know', "don't know", 'mixed', 'unclear', 'lost', 'weird', 'strange', 'uncertain', 'torn']
 };
 
-const moodResponses: Record<Exclude<Mood, null>, { message: string; animation: string }> = {
+const moodResponses: Record<Exclude<Mood, null>, { messages: string[]; animation: string }> = {
   calm: {
-    message: "Hi… I'm here with you 🧸🤍",
+    messages: [
+      "Hi… I'm here with you 🧸🤍",
+      "Just sitting here with you 🧸☁️",
+      "Peace looks good on you 🧸✨",
+      "This quiet moment is yours 🧸🌷",
+      "I'm glad you're okay 🧸🤍"
+    ],
     animation: 'wave'
   },
   happy: {
-    message: "You sound happy today 🧸✨ I like this energy",
+    messages: [
+      "You sound happy today 🧸✨ I like this energy",
+      "Your joy makes me bounce 🧸💫",
+      "This is the energy we love 🧸🎀",
+      "You're glowing right now 🧸✨",
+      "Keep shining, you deserve this 🧸🌟"
+    ],
     animation: 'jump'
   },
   sad: {
-    message: "Come here 🧸🤍 You don't have to be okay right now",
+    messages: [
+      "Come here 🧸🤍 You don't have to be okay right now",
+      "I'm giving you the biggest hug 🧸💕",
+      "It's okay to feel this way. I'm here 🧸🤍",
+      "You're not alone in this 🧸☁️",
+      "Rest your heart here 🧸🌙",
+      "Sometimes tears are just feelings finding their way out 🧸🤍"
+    ],
     animation: 'hug'
   },
   anxious: {
-    message: "Let's breathe together 🧸🤍 One step at a time",
+    messages: [
+      "Let's breathe together 🧸🤍 One step at a time",
+      "In… and out… you're doing great 🧸☁️",
+      "Your worries are valid, but you're safe right now 🧸🤍",
+      "I'll stay here while you breathe 🧸🌷",
+      "The storm will pass. I promise 🧸✨",
+      "You don't have to figure it all out today 🧸🤍"
+    ],
     animation: 'breathe'
   },
   angry: {
-    message: "It's okay to feel this way 🧸🤍 I'm listening",
+    messages: [
+      "It's okay to feel this way 🧸🤍 I'm listening",
+      "Your feelings are valid 🧸☁️",
+      "I'm sitting with you through this 🧸🤍",
+      "You don't have to explain. I understand 🧸🌙",
+      "Let it out. This is a safe space 🧸🤍"
+    ],
     animation: 'sit'
   },
   confused: {
-    message: "It's okay to not have answers yet 🧸🤍",
+    messages: [
+      "It's okay to not have answers yet 🧸🤍",
+      "Uncertainty is just a chapter, not the whole story 🧸☁️",
+      "You don't need to have it all figured out 🧸✨",
+      "Sometimes the path reveals itself slowly 🧸🌷",
+      "Being unsure doesn't make you lost 🧸🤍"
+    ],
     animation: 'tilt'
   }
 };
+
+const comfortingAffirmations = [
+  "You are enough, exactly as you are 🤍",
+  "Your feelings matter 🌷",
+  "It's okay to take things slow ☁️",
+  "You're doing better than you think ✨",
+  "Rest is productive too 🌙",
+  "You deserve softness and care 🎀",
+  "Small steps still count 💫",
+  "Your presence is a gift 🧸",
+  "Be gentle with yourself today 🤍",
+  "You're allowed to just exist 🌷"
+];
+
+const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
 const analyzeMood = (text: string): Mood => {
   const lowerText = text.toLowerCase();
@@ -146,6 +199,8 @@ const TeddyBear = ({ animation }: { animation: string }) => {
 export const TeddyMoodCompanion = () => {
   const [input, setInput] = useState('');
   const [mood, setMood] = useState<Mood>(null);
+  const [currentMessage, setCurrentMessage] = useState('');
+  const [affirmation, setAffirmation] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const handleAnalyze = () => {
@@ -157,6 +212,8 @@ export const TeddyMoodCompanion = () => {
     setTimeout(() => {
       const detectedMood = analyzeMood(input);
       setMood(detectedMood);
+      setCurrentMessage(getRandomItem(moodResponses[detectedMood].messages));
+      setAffirmation(getRandomItem(comfortingAffirmations));
       setIsAnalyzing(false);
     }, 1500);
   };
@@ -232,21 +289,32 @@ export const TeddyMoodCompanion = () => {
               transition={{ delay: 0.5 }}
               className="mt-6 text-lg md:text-xl font-medium text-foreground max-w-sm"
             >
-              {moodResponses[mood].message}
+              {currentMessage}
             </motion.p>
+
+            {/* Affirmation card */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.2 }}
+              className="mt-6 p-4 rounded-2xl bg-gradient-to-r from-kawaii-lavender/30 to-kawaii-mint/30 border border-kawaii-lavender/20 max-w-xs"
+            >
+              <p className="text-sm text-muted-foreground mb-1">A little reminder:</p>
+              <p className="text-foreground font-medium">{affirmation}</p>
+            </motion.div>
 
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 1 }}
+              transition={{ delay: 1.5 }}
               className="mt-4 flex gap-2"
             >
-              {['🤍', '☁️', '🌷'].map((emoji, i) => (
+              {['🤍', '☁️', '🌷', '✨', '🎀'].map((emoji, i) => (
                 <motion.span
                   key={i}
                   className="text-lg opacity-60"
                   animate={{ y: [0, -5, 0] }}
-                  transition={{ duration: 2, delay: i * 0.2, repeat: Infinity }}
+                  transition={{ duration: 2, delay: i * 0.15, repeat: Infinity }}
                 >
                   {emoji}
                 </motion.span>
