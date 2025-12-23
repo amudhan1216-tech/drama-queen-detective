@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { CustomCursor } from '@/components/CustomCursor';
 import { FloatingHearts } from '@/components/FloatingHearts';
 import { Header } from '@/components/Header';
@@ -12,7 +14,7 @@ import { CryPlaylist } from '@/components/CryPlaylist';
 import { DailyAffirmation } from '@/components/DailyAffirmation';
 import { LateNightMode } from '@/components/LateNightMode';
 import { ShareableCard } from '@/components/ShareableCard';
-import { TeddyMoodCompanion } from '@/components/TeddyMoodCompanion';
+import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
   const [delusionLevel, setDelusionLevel] = useState(50);
@@ -47,6 +49,39 @@ const Index = () => {
       <main className="relative z-10 container mx-auto px-4 pb-16">
         <Header />
 
+        {/* Teddy Companion Link Card */}
+        <Link to="/teddy">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            className="glass-card rounded-3xl p-6 md:p-8 mb-8 bg-gradient-to-r from-kawaii-cream/80 via-kawaii-blush/40 to-kawaii-lavender/40 cursor-pointer group"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <motion.span 
+                  className="text-5xl md:text-6xl"
+                  animate={{ rotate: [0, -10, 10, 0] }}
+                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+                >
+                  🧸
+                </motion.span>
+                <div>
+                  <h2 className="text-xl md:text-2xl font-bold text-foreground">Teddy Mood Companion</h2>
+                  <p className="text-muted-foreground text-sm">Get a big warm hug from Teddy 🤍</p>
+                </div>
+              </div>
+              <motion.div
+                className="p-3 rounded-full bg-kawaii-blush/30 group-hover:bg-kawaii-blush/50 transition-colors"
+                whileHover={{ x: 5 }}
+              >
+                <ArrowRight className="w-5 h-5 text-foreground" />
+              </motion.div>
+            </div>
+          </motion.div>
+        </Link>
+
         {/* Controls row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <DelusionSlider value={delusionLevel} onChange={setDelusionLevel} />
@@ -58,7 +93,6 @@ const Index = () => {
 
         {/* Main features grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <TeddyMoodCompanion />
           <OverthinkingGenerator delusionLevel={delusionLevel} bestieMode={bestieMode} />
           <MoodDetector />
           <SeenPanicTimer />
