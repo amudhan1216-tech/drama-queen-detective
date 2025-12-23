@@ -124,56 +124,135 @@ const BigTeddyBear = ({ animation, isIdle }: { animation: string; isIdle: boolea
     return (
       <motion.div
         className="relative flex items-center justify-center"
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' as const }}
+        initial={{ opacity: 0, scale: 0.3, y: 100 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: 'easeOut' as const }}
       >
-        {/* Left paw */}
+        {/* Left arm - open wide for hug */}
         <motion.div
-          className="absolute text-6xl md:text-8xl"
-          style={{ left: '-60px', top: '40%' }}
-          animate={{ 
-            rotate: [0, 15, 0, 15, 0],
-            x: [0, 10, 0, 10, 0]
+          className="absolute text-6xl md:text-8xl lg:text-9xl emoji"
+          style={{ 
+            left: '-100px', 
+            top: '30%',
+            fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
           }}
-          transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+          initial={{ rotate: 0, x: 0 }}
+          animate={{ 
+            rotate: [-45, -50, -45],
+            x: [-20, -30, -20],
+            y: [0, -5, 0]
+          }}
+          transition={{ 
+            duration: 2, 
+            repeat: Infinity, 
+            ease: 'easeInOut' as const,
+            delay: 0.5
+          }}
         >
-          🐾
+          🤚
         </motion.div>
         
-        {/* Main teddy */}
+        {/* Main teddy - bouncing invitingly */}
         <motion.div
-          className="text-[12rem] md:text-[16rem] lg:text-[20rem] select-none"
+          className="text-[10rem] md:text-[14rem] lg:text-[18rem] select-none emoji"
+          style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif' }}
+          initial={{ scale: 0.5 }}
           animate={{ 
-            scale: [1, 1.02, 1],
-            rotate: [0, -2, 2, 0]
+            scale: [1, 1.05, 1],
+            y: [0, -15, 0],
+            rotate: [0, -3, 3, 0]
           }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' as const }}
+          transition={{ 
+            duration: 2.5, 
+            repeat: Infinity, 
+            ease: 'easeInOut' as const 
+          }}
         >
           🧸
         </motion.div>
 
-        {/* Right paw */}
+        {/* Right arm - open wide for hug */}
         <motion.div
-          className="absolute text-6xl md:text-8xl"
-          style={{ right: '-60px', top: '40%' }}
-          animate={{ 
-            rotate: [0, -15, 0, -15, 0],
-            x: [0, -10, 0, -10, 0]
+          className="absolute text-6xl md:text-8xl lg:text-9xl emoji"
+          style={{ 
+            right: '-100px', 
+            top: '30%',
+            fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
           }}
-          transition={{ duration: 2, repeat: Infinity, repeatDelay: 1 }}
+          initial={{ rotate: 0, x: 0 }}
+          animate={{ 
+            rotate: [45, 50, 45],
+            x: [20, 30, 20],
+            y: [0, -5, 0]
+          }}
+          transition={{ 
+            duration: 2, 
+            repeat: Infinity, 
+            ease: 'easeInOut' as const,
+            delay: 0.5
+          }}
         >
-          🐾
+          🤚
         </motion.div>
 
-        {/* Floating hearts */}
+        {/* "Hug me" text bubble */}
         <motion.div
-          className="absolute -top-8 text-3xl"
-          animate={{ y: [0, -20, 0], opacity: [0.5, 1, 0.5] }}
-          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute -top-16 md:-top-20 px-6 py-3 rounded-full bg-kawaii-blush/80 backdrop-blur-sm border border-white/40 shadow-lg"
+          initial={{ opacity: 0, y: 20, scale: 0.8 }}
+          animate={{ 
+            opacity: 1, 
+            y: [0, -8, 0], 
+            scale: 1 
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut' as const,
+            delay: 1
+          }}
         >
-          🤍
+          <span className="text-lg md:text-xl font-semibold text-foreground">Hug me 🤍</span>
         </motion.div>
+
+        {/* Floating hearts around teddy */}
+        {[...Array(5)].map((_, i) => (
+          <motion.span
+            key={i}
+            className="absolute text-2xl md:text-3xl emoji"
+            style={{ 
+              left: `${20 + i * 15}%`,
+              top: `${10 + (i % 3) * 20}%`,
+              fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
+            }}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ 
+              opacity: [0, 0.8, 0],
+              scale: [0, 1, 0],
+              y: [0, -40, -80]
+            }}
+            transition={{ 
+              duration: 3,
+              repeat: Infinity,
+              delay: i * 0.6,
+              ease: 'easeOut' as const
+            }}
+          >
+            {['🤍', '✨', '💕', '☁️', '🌷'][i]}
+          </motion.span>
+        ))}
+
+        {/* Sparkle effects */}
+        <motion.span
+          className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-4xl emoji"
+          style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif' }}
+          animate={{ 
+            opacity: [0.5, 1, 0.5],
+            scale: [0.8, 1.2, 0.8]
+          }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          ✨
+        </motion.span>
       </motion.div>
     );
   }
