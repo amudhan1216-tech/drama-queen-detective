@@ -1,13 +1,62 @@
-import { useState } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Heart, ArrowLeft } from 'lucide-react';
+import { Heart, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
 import { CustomCursor } from '@/components/CustomCursor';
 import { FloatingHearts } from '@/components/FloatingHearts';
+import { Switch } from '@/components/ui/switch';
 
 type Mood = 'calm' | 'happy' | 'sad' | 'anxious' | 'angry' | 'confused' | null;
+
+// Gentle chime sound using Web Audio API
+const playChime = (frequency: number = 523.25, duration: number = 0.4) => {
+  try {
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    
+    // Create oscillator for the main tone
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = frequency;
+    oscillator.type = 'sine';
+    
+    // Gentle fade in and out
+    gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+    gainNode.gain.linearRampToValueAtTime(0.15, audioContext.currentTime + 0.05);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + duration);
+    
+    // Add a soft harmonic
+    const harmonic = audioContext.createOscillator();
+    const harmonicGain = audioContext.createGain();
+    harmonic.connect(harmonicGain);
+    harmonicGain.connect(audioContext.destination);
+    harmonic.frequency.value = frequency * 2;
+    harmonic.type = 'sine';
+    harmonicGain.gain.setValueAtTime(0, audioContext.currentTime);
+    harmonicGain.gain.linearRampToValueAtTime(0.05, audioContext.currentTime + 0.05);
+    harmonicGain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration * 0.8);
+    harmonic.start(audioContext.currentTime);
+    harmonic.stop(audioContext.currentTime + duration);
+  } catch (e) {
+    console.log('Audio not supported');
+  }
+};
+
+const playHugSound = () => {
+  // Play a gentle ascending chord
+  playChime(392, 0.5); // G
+  setTimeout(() => playChime(494, 0.5), 100); // B
+  setTimeout(() => playChime(587, 0.6), 200); // D
+  setTimeout(() => playChime(784, 0.8), 350); // High G
+};
 
 const moodKeywords: Record<Exclude<Mood, null>, string[]> = {
   calm: ['okay', 'fine', 'chill', 'relaxed', 'peaceful', 'good', 'alright', 'neutral', 'meh', 'content', 'steady'],
@@ -119,14 +168,109 @@ const analyzeMood = (text: string): Exclude<Mood, null> => {
   return Object.entries(moodScores).find(([_, score]) => score === maxScore)?.[0] as Exclude<Mood, null> || 'calm';
 };
 
-const BigTeddyBear = ({ animation, isIdle }: { animation: string; isIdle: boolean }) => {
+const BigTeddyBear = ({ 
+  animation, 
+  isIdle, 
+  isHugging, 
+  onTeddyClick,
+  soundEnabled 
+}: { 
+  animation: string; 
+  isIdle: boolean; 
+  isHugging: boolean;
+  onTeddyClick: () => void;
+  soundEnabled: boolean;
+}) => {
+  // Hugging state (clicked)
+  if (isHugging) {
+    return (
+      <motion.div
+        className="relative flex items-center justify-center cursor-pointer"
+        onClick={onTeddyClick}
+      >
+        {/* Left arm - wrapping around */}
+        <motion.div
+          className="absolute text-6xl md:text-8xl lg:text-9xl emoji z-10"
+          style={{ 
+            left: '0px', 
+            top: '35%',
+            fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
+          }}
+          initial={{ rotate: -45, x: -100 }}
+          animate={{ rotate: 30, x: 50 }}
+          transition={{ duration: 0.8, ease: 'easeOut' as const }}
+        >
+          🤚
+        </motion.div>
+        
+        {/* Main teddy - growing bigger for hug */}
+        <motion.div
+          className="text-[10rem] md:text-[14rem] lg:text-[18rem] select-none emoji"
+          style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif' }}
+          initial={{ scale: 1 }}
+          animate={{ scale: [1, 1.2, 1.15] }}
+          transition={{ duration: 0.8, ease: 'easeOut' as const }}
+        >
+          🧸
+        </motion.div>
+
+        {/* Right arm - wrapping around */}
+        <motion.div
+          className="absolute text-6xl md:text-8xl lg:text-9xl emoji z-10"
+          style={{ 
+            right: '0px', 
+            top: '35%',
+            fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif'
+          }}
+          initial={{ rotate: 45, x: 100 }}
+          animate={{ rotate: -30, x: -50 }}
+          transition={{ duration: 0.8, ease: 'easeOut' as const }}
+        >
+          🤚
+        </motion.div>
+
+        {/* Hearts burst on hug */}
+        {[...Array(8)].map((_, i) => (
+          <motion.span
+            key={i}
+            className="absolute text-3xl md:text-4xl emoji"
+            style={{ fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif' }}
+            initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+            animate={{ 
+              opacity: [0, 1, 0],
+              scale: [0, 1.5, 0],
+              x: Math.cos((i / 8) * Math.PI * 2) * 150,
+              y: Math.sin((i / 8) * Math.PI * 2) * 150 - 50
+            }}
+            transition={{ duration: 1.5, delay: i * 0.1, ease: 'easeOut' as const }}
+          >
+            {['💕', '🤍', '✨', '💗', '☁️', '🌷', '💫', '🎀'][i]}
+          </motion.span>
+        ))}
+
+        {/* Hug message */}
+        <motion.div
+          className="absolute -top-20 md:-top-24 px-8 py-4 rounded-full bg-kawaii-blush/90 backdrop-blur-sm border border-white/50 shadow-xl"
+          initial={{ opacity: 0, scale: 0.5, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.5 }}
+        >
+          <span className="text-xl md:text-2xl font-bold text-foreground">*hugs you tight* 🤍</span>
+        </motion.div>
+      </motion.div>
+    );
+  }
+
   if (isIdle) {
     return (
       <motion.div
-        className="relative flex items-center justify-center"
+        className="relative flex items-center justify-center cursor-pointer"
         initial={{ opacity: 0, scale: 0.3, y: 100 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ duration: 1.2, ease: 'easeOut' as const }}
+        onClick={onTeddyClick}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
       >
         {/* Left arm - open wide for hug */}
         <motion.div
@@ -211,7 +355,7 @@ const BigTeddyBear = ({ animation, isIdle }: { animation: string; isIdle: boolea
             delay: 1
           }}
         >
-          <span className="text-lg md:text-xl font-semibold text-foreground">Hug me 🤍</span>
+          <span className="text-lg md:text-xl font-semibold text-foreground">Click to hug me 🤍</span>
         </motion.div>
 
         {/* Floating hearts around teddy */}
@@ -388,12 +532,36 @@ const TeddyPage = () => {
   const [currentMessage, setCurrentMessage] = useState('');
   const [affirmation, setAffirmation] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isHugging, setIsHugging] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const hugTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTeddyClick = useCallback(() => {
+    if (isHugging) return;
+    
+    setIsHugging(true);
+    
+    if (soundEnabled) {
+      playHugSound();
+    }
+    
+    // Reset after hug animation
+    if (hugTimeoutRef.current) clearTimeout(hugTimeoutRef.current);
+    hugTimeoutRef.current = setTimeout(() => {
+      setIsHugging(false);
+    }, 3000);
+  }, [isHugging, soundEnabled]);
 
   const handleAnalyze = () => {
     if (!input.trim()) return;
     
     setIsAnalyzing(true);
     setMood(null);
+    setIsHugging(false);
+
+    if (soundEnabled) {
+      playChime(440, 0.3);
+    }
 
     setTimeout(() => {
       const detectedMood = analyzeMood(input);
@@ -401,6 +569,19 @@ const TeddyPage = () => {
       setCurrentMessage(getRandomItem(moodResponses[detectedMood].messages));
       setAffirmation(getRandomItem(comfortingAffirmations));
       setIsAnalyzing(false);
+      
+      if (soundEnabled) {
+        // Play different chimes based on mood
+        if (detectedMood === 'happy') {
+          playChime(523, 0.4);
+          setTimeout(() => playChime(659, 0.4), 150);
+          setTimeout(() => playChime(784, 0.5), 300);
+        } else if (detectedMood === 'sad') {
+          playHugSound();
+        } else {
+          playChime(523, 0.5);
+        }
+      }
     }, 1500);
   };
 
@@ -425,6 +606,21 @@ const TeddyPage = () => {
         <ArrowLeft className="w-4 h-4" />
         <span className="text-sm font-medium">Back</span>
       </Link>
+
+      {/* Sound toggle */}
+      <div className="fixed top-6 right-6 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-background/80 backdrop-blur-sm border border-kawaii-blush/30">
+        {soundEnabled ? (
+          <Volume2 className="w-4 h-4 text-foreground" />
+        ) : (
+          <VolumeX className="w-4 h-4 text-muted-foreground" />
+        )}
+        <Switch 
+          checked={soundEnabled} 
+          onCheckedChange={setSoundEnabled}
+          className="data-[state=checked]:bg-kawaii-blush"
+        />
+        <span className="text-xs text-muted-foreground hidden sm:inline">Sound</span>
+      </div>
 
       <main className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 py-16">
         {/* Title */}
@@ -469,6 +665,9 @@ const TeddyPage = () => {
                 <BigTeddyBear 
                   animation={mood ? moodResponses[mood].animation : ''} 
                   isIdle={!mood} 
+                  isHugging={isHugging}
+                  onTeddyClick={handleTeddyClick}
+                  soundEnabled={soundEnabled}
                 />
               </motion.div>
             )}
