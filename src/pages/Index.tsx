@@ -12,6 +12,7 @@ import { CryPlaylist } from '@/components/CryPlaylist';
 import { DailyAffirmation } from '@/components/DailyAffirmation';
 import { LateNightMode } from '@/components/LateNightMode';
 import { ShareableCard } from '@/components/ShareableCard';
+import { TeddyMoodCompanion } from '@/components/TeddyMoodCompanion';
 
 const Index = () => {
   const [delusionLevel, setDelusionLevel] = useState(50);
@@ -57,6 +58,7 @@ const Index = () => {
 
         {/* Main features grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <TeddyMoodCompanion />
           <OverthinkingGenerator delusionLevel={delusionLevel} bestieMode={bestieMode} />
           <MoodDetector />
           <SeenPanicTimer />
