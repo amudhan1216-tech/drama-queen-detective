@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Heart, ArrowLeft, Volume2, VolumeX } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Heart, ArrowLeft, Volume2, VolumeX, Instagram, Search } from 'lucide-react';
 import { CustomCursor } from '@/components/CustomCursor';
 import { FloatingHearts } from '@/components/FloatingHearts';
 import { Switch } from '@/components/ui/switch';
@@ -143,6 +144,59 @@ const comfortingAffirmations = [
   "Your presence is a gift 🧸",
   "Be gentle with yourself today 🤍",
   "You're allowed to just exist 🌷"
+];
+
+// Boy analyzer data (for fun only!)
+const boyMindsets = [
+  "Emotionally unavailable but posts deep quotes 🌙",
+  "Thinks he's mysterious but everyone knows his moves 🕵️",
+  "Will ghost you then ask 'wyd' at 2am 👻",
+  "Has commitment issues but wants you to commit 🎭",
+  "Says 'I'm not like other guys' (he is exactly like other guys) 🚩",
+  "Hot and cold specialist - confusing but intentional ❄️🔥",
+  "Posts gym pics but skips emotional accountability day 💪",
+  "Replies in 3 days but expects instant responses 📱",
+  "Deep conversations at 3am, stranger by morning ☀️",
+  "His Spotify is sad boy hours 24/7 🎧"
+];
+
+const boyWithGirls = [
+  "Will make you feel special... until someone newer shows up 🌸",
+  "Good at texting, bad at actually showing up 📵",
+  "Gives breadcrumbs and calls it a whole loaf 🍞",
+  "Says 'you're different' to everyone 💔",
+  "Will remember your birthday but forget to text back 🎂",
+  "Makes plans then 'something came up' 🙄",
+  "Sweet in private, acts single in public 🎭",
+  "Compliments your pics but never your mind 🧠",
+  "Will introduce you as 'friend' after 3 months 👀",
+  "Talks about his ex 'just as friends' 🚨"
+];
+
+const boyRedFlags = [
+  "Has 'no drama' in bio (is the drama) 🚩",
+  "Following 2000 girls 'for the aesthetic' 👁️",
+  "Last post: mirror selfie with cryptic caption 🪞",
+  "Stories: gym, car, repeat 🔄",
+  "Bio says 'king' (unconfirmed) 👑",
+  "Highlights: 'memories' from situationships 📸",
+  "Uses 🤷‍♂️ as personality 🤷‍♂️",
+  "Profile says 'just vibing' (chaotically) 🌀",
+  "Follower ratio: concerning 📊",
+  "Reposts relationship memes but can't commit 💀"
+];
+
+const boyVerdicts = [
+  "Run bestie. Just run. 🏃‍♀️",
+  "He's a lesson, not a blessing 📚",
+  "Block button exists for a reason 🔒",
+  "You deserve better (literally anyone else) ✨",
+  "This is not your person, babes 🙅‍♀️",
+  "Red flags are not a color palette 🚩",
+  "He's someone else's problem now 💅",
+  "The streets are calling his name 🛤️",
+  "Proceed with extreme caution ⚠️",
+  "Next! 👋"
 ];
 
 const getRandomItem = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
@@ -742,17 +796,198 @@ const TeddyPage = () => {
           </Button>
         </motion.div>
 
+        {/* Boy Analyzer Section */}
+        <BoyAnalyzer soundEnabled={soundEnabled} />
+
         {/* Disclaimer */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}
           transition={{ delay: 1 }}
-          className="mt-12 text-xs text-center text-muted-foreground"
+          className="mt-12 text-xs text-center text-muted-foreground max-w-md"
         >
-          This app is for comfort and fun, not professional support 🤍
+          This app is for comfort and fun, not professional support 🤍<br />
+          Boy analyzer is 100% fake and for entertainment only!
         </motion.p>
       </main>
     </div>
+  );
+};
+
+// Boy Analyzer Component
+const BoyAnalyzer = ({ soundEnabled }: { soundEnabled: boolean }) => {
+  const [instagramId, setInstagramId] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [result, setResult] = useState<{
+    mindset: string;
+    withGirls: string;
+    redFlag: string;
+    verdict: string;
+    dangerLevel: number;
+  } | null>(null);
+
+  const analyzeProfile = () => {
+    if (!instagramId.trim()) return;
+    
+    setIsAnalyzing(true);
+    setResult(null);
+
+    if (soundEnabled) {
+      playChime(440, 0.3);
+    }
+
+    setTimeout(() => {
+      setResult({
+        mindset: getRandomItem(boyMindsets),
+        withGirls: getRandomItem(boyWithGirls),
+        redFlag: getRandomItem(boyRedFlags),
+        verdict: getRandomItem(boyVerdicts),
+        dangerLevel: Math.floor(Math.random() * 40) + 60, // Always high for drama 60-100%
+      });
+      setIsAnalyzing(false);
+
+      if (soundEnabled) {
+        // Warning sound
+        playChime(330, 0.3);
+        setTimeout(() => playChime(294, 0.4), 200);
+      }
+    }, 2500);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.5 }}
+      className="w-full max-w-md mt-16"
+    >
+      <div className="glass-card rounded-3xl p-6 md:p-8 bg-gradient-to-br from-kawaii-lavender/30 to-kawaii-blush/30 border border-kawaii-lavender/20">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-400/40 to-pink-400/40">
+            <Instagram className="w-6 h-6 text-foreground" />
+          </div>
+          <div>
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">Boy Analyzer 🔍</h2>
+            <p className="text-muted-foreground text-sm">Enter his IG, we'll expose the vibes</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="relative">
+            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">@</span>
+            <Input
+              value={instagramId}
+              onChange={(e) => setInstagramId(e.target.value)}
+              placeholder="his_instagram_id"
+              className="pl-8 h-12 bg-background/60 border-kawaii-lavender/30 rounded-2xl text-base"
+            />
+          </div>
+
+          <Button
+            onClick={analyzeProfile}
+            disabled={isAnalyzing || !instagramId.trim()}
+            className="kawaii-btn w-full h-12 rounded-2xl bg-gradient-to-r from-purple-400 to-pink-400 text-white font-semibold text-lg gap-2"
+          >
+            <Search className="w-5 h-5" />
+            {isAnalyzing ? 'Investigating... 🕵️‍♀️' : 'Analyze This Boy 🔮'}
+          </Button>
+        </div>
+
+        <AnimatePresence>
+          {isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="mt-6 flex flex-col items-center"
+            >
+              <motion.div
+                className="text-5xl"
+                animate={{ rotate: [0, 360] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              >
+                🔍
+              </motion.div>
+              <p className="mt-3 text-sm text-muted-foreground text-center">
+                Scanning red flags...<br />
+                <span className="text-xs">Checking emotional availability...</span>
+              </p>
+            </motion.div>
+          )}
+
+          {result && !isAnalyzing && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="mt-6 space-y-4"
+            >
+              {/* Danger Level */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-400/30">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-muted-foreground">🚨 Red Flag Level</span>
+                  <span className="text-2xl font-bold text-red-400">{result.dangerLevel}%</span>
+                </div>
+                <div className="w-full h-3 rounded-full bg-muted overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${result.dangerLevel}%` }}
+                    transition={{ duration: 1.5, ease: 'easeOut' }}
+                    className="h-full rounded-full bg-gradient-to-r from-orange-400 to-red-500"
+                  />
+                </div>
+              </div>
+
+              {/* Analysis Results */}
+              <div className="space-y-3">
+                <div className="p-3 rounded-xl bg-background/50 border border-kawaii-lavender/20">
+                  <p className="text-xs text-muted-foreground mb-1">🧠 His Mindset</p>
+                  <p className="text-sm font-medium text-foreground">{result.mindset}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-background/50 border border-kawaii-blush/20">
+                  <p className="text-xs text-muted-foreground mb-1">💕 How He Is With Girls</p>
+                  <p className="text-sm font-medium text-foreground">{result.withGirls}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-background/50 border border-red-400/20">
+                  <p className="text-xs text-muted-foreground mb-1">🚩 Red Flag Detected</p>
+                  <p className="text-sm font-medium text-foreground">{result.redFlag}</p>
+                </div>
+              </div>
+
+              {/* Verdict */}
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                className="p-4 rounded-2xl bg-gradient-to-r from-kawaii-blush/50 to-kawaii-lavender/50 border border-white/30 text-center"
+              >
+                <p className="text-xs text-muted-foreground mb-1">✨ Teddy's Verdict ✨</p>
+                <p className="text-lg font-bold text-foreground">{result.verdict}</p>
+              </motion.div>
+
+              {/* Floating warning emojis */}
+              <div className="flex justify-center gap-2 pt-2">
+                {['🚩', '👀', '💀', '🏃‍♀️', '⚠️'].map((emoji, i) => (
+                  <motion.span
+                    key={i}
+                    className="text-lg"
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{ duration: 1.5, delay: i * 0.1, repeat: Infinity }}
+                  >
+                    {emoji}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <p className="mt-6 text-[10px] text-center text-muted-foreground/60">
+          *This is 100% fake and for fun only. We don't actually analyze Instagram profiles!
+        </p>
+      </div>
+    </motion.div>
   );
 };
 
