@@ -10,7 +10,8 @@ interface Heart {
   size: number;
 }
 
-const emojis = ['💕', '💖', '✨', '🌸', '💗', '🎀', '⭐', '💫', '🌙', '🦋'];
+// iOS-style emojis (using standard Unicode emojis that render as iOS style on Apple devices)
+const emojis = ['🤍', '💕', '✨', '🌸', '☁️', '🎀', '🌷', '💫', '🌙', '🦋'];
 
 export const FloatingHearts = () => {
   const [hearts, setHearts] = useState<Heart[]>([]);
@@ -36,12 +37,13 @@ export const FloatingHearts = () => {
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
       <AnimatePresence>
         {hearts.map(heart => (
-          <motion.div
+          <motion.span
             key={heart.id}
-            className="absolute"
+            className="absolute emoji"
             style={{ 
               left: `${heart.x}%`,
               fontSize: heart.size,
+              fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
             }}
             initial={{ y: '100vh', opacity: 0, rotate: -20 }}
             animate={{ 
@@ -58,7 +60,7 @@ export const FloatingHearts = () => {
             }}
           >
             {heart.emoji}
-          </motion.div>
+          </motion.span>
         ))}
       </AnimatePresence>
     </div>

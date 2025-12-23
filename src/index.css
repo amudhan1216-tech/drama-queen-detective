@@ -98,9 +98,22 @@
     @apply border-border;
   }
 
+  /* iOS Emoji Font Stack */
+  body, html {
+    font-family: 'Quicksand', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  /* Force iOS-style emoji rendering */
   body {
     @apply bg-background text-foreground font-quicksand;
     cursor: none;
+  }
+
+  /* Emoji-specific font styling for iOS look */
+  .emoji, 
+  [class*="emoji"],
+  span:has(> :only-child:where([data-emoji])) {
+    font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
