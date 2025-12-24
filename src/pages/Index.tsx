@@ -1,115 +1,319 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { CustomCursor } from '@/components/CustomCursor';
-import { FloatingHearts } from '@/components/FloatingHearts';
-import { Header } from '@/components/Header';
-import { OverthinkingGenerator } from '@/components/OverthinkingGenerator';
-import { MoodDetector } from '@/components/MoodDetector';
-import { SeenPanicTimer } from '@/components/SeenPanicTimer';
-import { DelusionSlider } from '@/components/DelusionSlider';
-import { BestieMode } from '@/components/BestieMode';
-import { ScreenshotAnalyzer } from '@/components/ScreenshotAnalyzer';
-import { CryPlaylist } from '@/components/CryPlaylist';
-import { DailyAffirmation } from '@/components/DailyAffirmation';
-import { LateNightMode } from '@/components/LateNightMode';
-import { ShareableCard } from '@/components/ShareableCard';
-import { ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '@/integrations/supabase/client';
+
+const floatingEmojis = ['💕', '✨', '🌸', '🎀', '☁️', '🦋', '💫', '🌷', '🤍', '💗'];
 
 const Index = () => {
-  const [delusionLevel, setDelusionLevel] = useState(50);
-  const [bestieMode, setBestieMode] = useState(false);
-  const [isLateNight, setIsLateNight] = useState(false);
+  const navigate = useNavigate();
+  const [stage, setStage] = useState(0); // 0: initial, 1: text1, 2: text2, 3: teddy, 4: redirect
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    // Check if user is already logged in
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        // User is logged in, check if they completed quiz
+        const { data: preferences } = await supabase
+          .from('user_preferences')
+          .select('completed_at')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+
+        if (preferences?.completed_at) {
+          navigate('/mood');
+        } else {
+          navigate('/quiz');
+        }
+        return;
+      }
+
+      setIsCheckingAuth(false);
+      // Start animation sequence
+      startAnimations();
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  const startAnimations = () => {
+    // Stage 1: First text appears
+    setTimeout(() => setStage(1), 500);
+    // Stage 2: Second text
+    setTimeout(() => setStage(2), 2000);
+    // Stage 3: Teddy appears
+    setTimeout(() => setStage(3), 3500);
+    // Stage 4: Redirect to auth
+    setTimeout(() => {
+      setStage(4);
+      navigate('/auth');
+    }, 5500);
+  };
+
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360, scale: [1, 1.2, 1] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="text-6xl"
+        >
+          ✨
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
-      {/* Background gradient */}
-      <div 
-        className="fixed inset-0 pointer-events-none"
-        style={{
-          background: isLateNight 
-            ? 'radial-gradient(ellipse at top, hsl(280 50% 15%) 0%, hsl(260 30% 8%) 100%)'
-            : 'radial-gradient(ellipse at top, hsl(340 100% 97%) 0%, hsl(280 60% 95%) 50%, hsl(200 80% 95%) 100%)'
-        }}
-      />
+    <div 
+      className="min-h-screen relative overflow-hidden flex items-center justify-center"
+      style={{
+        background: 'radial-gradient(ellipse at top, hsl(340 100% 97%) 0%, hsl(280 60% 95%) 50%, hsl(320 80% 94%) 100%)'
+      }}
+    >
+      {/* Floating background emojis */}
+      {floatingEmojis.map((emoji, i) => (
+        <motion.span
+          key={i}
+          className="fixed text-3xl md:text-4xl opacity-30 pointer-events-none"
+          initial={{ 
+            x: Math.random() * window.innerWidth,
+            y: window.innerHeight + 100,
+            rotate: 0
+          }}
+          animate={{ 
+            y: -100,
+            rotate: 360,
+            x: Math.random() * window.innerWidth
+          }}
+          transition={{ 
+            duration: 8 + Math.random() * 5,
+            repeat: Infinity,
+            delay: i * 0.5,
+            ease: 'linear'
+          }}
+        >
+          {emoji}
+        </motion.span>
+      ))}
 
-      {/* Custom cursor */}
-      <CustomCursor />
-      
-      {/* Floating hearts background */}
-      <FloatingHearts />
-      
-      {/* Late night mode toggle */}
-      <LateNightMode onModeChange={setIsLateNight} />
-      
-      {/* Daily affirmation popup */}
-      <DailyAffirmation />
+      {/* Sparkle particles */}
+      {[...Array(20)].map((_, i) => (
+        <motion.div
+          key={`sparkle-${i}`}
+          className="fixed w-2 h-2 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 pointer-events-none"
+          initial={{ 
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            scale: 0,
+            opacity: 0
+          }}
+          animate={{ 
+            scale: [0, 1, 0],
+            opacity: [0, 1, 0]
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            delay: i * 0.3,
+            ease: 'easeInOut'
+          }}
+        />
+      ))}
 
       {/* Main content */}
-      <main className="relative z-10 container mx-auto px-4 pb-16">
-        <Header />
-
-        {/* Teddy Companion Link Card */}
-        <Link to="/teddy">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="glass-card rounded-3xl p-6 md:p-8 mb-8 bg-gradient-to-r from-kawaii-cream/80 via-kawaii-blush/40 to-kawaii-lavender/40 cursor-pointer group"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <motion.span 
-                  className="text-5xl md:text-6xl"
-                  animate={{ rotate: [0, -10, 10, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  🧸
-                </motion.span>
-                <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-foreground">Teddy Mood Companion</h2>
-                  <p className="text-muted-foreground text-sm">Get a big warm hug from Teddy 🤍</p>
-                </div>
-              </div>
-              <motion.div
-                className="p-3 rounded-full bg-kawaii-blush/30 group-hover:bg-kawaii-blush/50 transition-colors"
-                whileHover={{ x: 5 }}
+      <div className="relative z-10 text-center px-6">
+        <AnimatePresence mode="wait">
+          {/* Stage 1: Welcome text */}
+          {stage >= 1 && stage < 4 && (
+            <motion.div
+              initial={{ opacity: 0, y: 30, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -30 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="mb-8"
+            >
+              <motion.h1 
+                className="text-4xl md:text-6xl lg:text-7xl font-bold"
+                style={{
+                  background: 'linear-gradient(135deg, hsl(340 82% 55%) 0%, hsl(280 60% 60%) 50%, hsl(200 80% 60%) 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
               >
-                <ArrowRight className="w-5 h-5 text-foreground" />
+                Hey Girlie! 💕
+              </motion.h1>
+              
+              <motion.div
+                initial={{ opacity: 0, scale: 0 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="flex justify-center gap-2 mt-4"
+              >
+                {['🌸', '✨', '💗', '✨', '🌸'].map((emoji, i) => (
+                  <motion.span
+                    key={i}
+                    animate={{ 
+                      y: [0, -10, 0],
+                      scale: [1, 1.2, 1]
+                    }}
+                    transition={{ 
+                      duration: 1.5,
+                      delay: i * 0.1,
+                      repeat: Infinity
+                    }}
+                    className="text-2xl md:text-3xl"
+                  >
+                    {emoji}
+                  </motion.span>
+                ))}
               </motion.div>
-            </div>
-          </motion.div>
-        </Link>
+            </motion.div>
+          )}
 
-        {/* Controls row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <DelusionSlider value={delusionLevel} onChange={setDelusionLevel} />
-          <div className="space-y-6">
-            <BestieMode enabled={bestieMode} onToggle={setBestieMode} />
-            <CryPlaylist />
-          </div>
-        </div>
+          {/* Stage 2: Subtitle */}
+          {stage >= 2 && stage < 4 && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="mb-12"
+            >
+              <p className="text-xl md:text-2xl text-foreground/80 font-medium">
+                Your cute mood companion is here 🎀
+              </p>
+              <motion.p 
+                className="text-lg text-muted-foreground mt-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                Let's discover your vibe together ✨
+              </motion.p>
+            </motion.div>
+          )}
 
-        {/* Main features grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <OverthinkingGenerator delusionLevel={delusionLevel} bestieMode={bestieMode} />
-          <MoodDetector />
-          <SeenPanicTimer />
-          <ScreenshotAnalyzer />
-          <ShareableCard />
-        </div>
+          {/* Stage 3: Big animated teddy */}
+          {stage >= 3 && stage < 4 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0, rotate: -20 }}
+              animate={{ 
+                opacity: 1, 
+                scale: 1, 
+                rotate: 0,
+                y: [0, -20, 0]
+              }}
+              transition={{ 
+                duration: 0.8,
+                y: { duration: 2, repeat: Infinity, ease: 'easeInOut' }
+              }}
+              className="relative"
+            >
+              {/* Glow effect behind teddy */}
+              <motion.div
+                className="absolute inset-0 flex items-center justify-center"
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  opacity: [0.3, 0.6, 0.3]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <div 
+                  className="w-48 h-48 md:w-64 md:h-64 rounded-full blur-3xl"
+                  style={{ background: 'radial-gradient(circle, hsl(340 82% 65% / 0.5) 0%, transparent 70%)' }}
+                />
+              </motion.div>
 
-        {/* Footer */}
-        <footer className="mt-16 text-center">
-          <p className="text-muted-foreground text-sm">
-            Made with 💕 and a lot of emotional damage
-          </p>
-          <p className="text-xs text-muted-foreground/60 mt-2">
-            This is a joke app. Please don't actually make life decisions based on this. 🌸
-          </p>
-        </footer>
-      </main>
+              {/* Teddy emoji */}
+              <motion.span 
+                className="text-[8rem] md:text-[12rem] lg:text-[14rem] block relative z-10"
+                animate={{ 
+                  rotate: [-5, 5, -5],
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'easeInOut'
+                }}
+                style={{ 
+                  fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
+                  filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))'
+                }}
+              >
+                🧸
+              </motion.span>
+
+              {/* Hearts around teddy */}
+              {['💕', '🤍', '✨', '💗', '☁️', '🌷'].map((emoji, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute text-3xl md:text-4xl"
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ 
+                    opacity: [0, 1, 0],
+                    scale: [0, 1.5, 0],
+                    x: Math.cos((i / 6) * Math.PI * 2) * 150,
+                    y: Math.sin((i / 6) * Math.PI * 2) * 150 - 50
+                  }}
+                  transition={{ 
+                    duration: 2,
+                    delay: i * 0.2,
+                    repeat: Infinity,
+                    repeatDelay: 1
+                  }}
+                  style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
+                >
+                  {emoji}
+                </motion.span>
+              ))}
+
+              {/* Loading text */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="text-lg text-muted-foreground mt-8"
+              >
+                <motion.span
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  Opening the door for you...
+                </motion.span>
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Bottom decorative wave */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
+        <svg viewBox="0 0 1440 120" className="w-full h-full" preserveAspectRatio="none">
+          <motion.path
+            d="M0,60 C360,120 1080,0 1440,60 L1440,120 L0,120 Z"
+            fill="url(#waveGradient)"
+            initial={{ d: "M0,80 C360,80 1080,80 1440,80 L1440,120 L0,120 Z" }}
+            animate={{ d: "M0,60 C360,120 1080,0 1440,60 L1440,120 L0,120 Z" }}
+            transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
+          />
+          <defs>
+            <linearGradient id="waveGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(340 82% 85% / 0.5)" />
+              <stop offset="50%" stopColor="hsl(280 60% 85% / 0.5)" />
+              <stop offset="100%" stopColor="hsl(200 80% 85% / 0.5)" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </motion.div>
     </div>
   );
 };
