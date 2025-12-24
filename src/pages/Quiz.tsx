@@ -156,8 +156,8 @@ const Quiz = () => {
         .maybeSingle();
 
       if (preferences?.completed_at) {
-        // User already completed quiz, go to mood page
-        navigate('/mood');
+        // User already completed quiz, go to home page
+        navigate('/home');
       }
 
       setIsLoading(false);
