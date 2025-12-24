@@ -14,7 +14,105 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      mood_entries: {
+        Row: {
+          created_at: string
+          emojis: string[]
+          id: string
+          mood_score: number | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emojis?: string[]
+          id?: string
+          mood_score?: number | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emojis?: string[]
+          id?: string
+          mood_score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          favorite_color: string | null
+          favorite_dessert: string | null
+          favorite_drink: string | null
+          favorite_flower: string | null
+          favorite_food: string | null
+          favorite_hobby: string | null
+          favorite_movie_genre: string | null
+          favorite_music: string | null
+          favorite_season: string | null
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          favorite_color?: string | null
+          favorite_dessert?: string | null
+          favorite_drink?: string | null
+          favorite_flower?: string | null
+          favorite_food?: string | null
+          favorite_hobby?: string | null
+          favorite_movie_genre?: string | null
+          favorite_music?: string | null
+          favorite_season?: string | null
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          favorite_color?: string | null
+          favorite_dessert?: string | null
+          favorite_drink?: string | null
+          favorite_flower?: string | null
+          favorite_food?: string | null
+          favorite_hobby?: string | null
+          favorite_movie_genre?: string | null
+          favorite_music?: string | null
+          favorite_season?: string | null
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
