@@ -1,30 +1,96 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Music, Play, Pause } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const sadSongs = [
-  { title: "Why Did You Leave Me on Read", artist: "The Anxious Hearts" },
-  { title: "Situationship Blues", artist: "Confused & Crying" },
-  { title: "They Said 'K' and My Heart Shattered", artist: "Dramatic Tears" },
-  { title: "3AM Thoughts About You", artist: "Sleepless Nights" },
-  { title: "I Checked Their Instagram Story 47 Times", artist: "Stalker Era" },
-  { title: "Maybe They're Just Busy (They're Not)", artist: "The Delusional" },
-  { title: "Ghosted in the Moonlight", artist: "Disappeared Again" },
-  { title: "One-Sided Effort Anthem", artist: "Lonely Hearts Club" },
-  { title: "They Liked Someone Else's Photo", artist: "Digital Heartbreak" },
-  { title: "When 'We Need to Talk' Hits", artist: "Anxiety Attack" },
+  { title: "Why Did You Leave Me on Read", artist: "The Anxious Hearts", notes: [261.63, 246.94, 220, 196, 174.61] },
+  { title: "Situationship Blues", artist: "Confused & Crying", notes: [293.66, 261.63, 246.94, 220, 196] },
+  { title: "They Said 'K' and My Heart Shattered", artist: "Dramatic Tears", notes: [329.63, 293.66, 261.63, 246.94, 220] },
+  { title: "3AM Thoughts About You", artist: "Sleepless Nights", notes: [349.23, 329.63, 293.66, 261.63, 246.94] },
+  { title: "I Checked Their Instagram Story 47 Times", artist: "Stalker Era", notes: [392, 349.23, 329.63, 293.66, 261.63] },
+  { title: "Maybe They're Just Busy (They're Not)", artist: "The Delusional", notes: [440, 392, 349.23, 329.63, 293.66] },
+  { title: "Ghosted in the Moonlight", artist: "Disappeared Again", notes: [246.94, 220, 196, 174.61, 164.81] },
+  { title: "One-Sided Effort Anthem", artist: "Lonely Hearts Club", notes: [293.66, 277.18, 261.63, 246.94, 233.08] },
+  { title: "They Liked Someone Else's Photo", artist: "Digital Heartbreak", notes: [311.13, 293.66, 277.18, 261.63, 246.94] },
+  { title: "When 'We Need to Talk' Hits", artist: "Anxiety Attack", notes: [369.99, 349.23, 329.63, 311.13, 293.66] },
 ];
 
 export const CryPlaylist = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentSong, setCurrentSong] = useState<typeof sadSongs[0] | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const playSadSong = () => {
-    const randomSong = sadSongs[Math.floor(Math.random() * sadSongs.length)];
-    setCurrentSong(randomSong);
-    setIsPlaying(true);
+  const playNote = (frequency: number, duration: number, delay: number) => {
+    if (!audioContextRef.current) return;
+    
+    const ctx = audioContextRef.current;
+    const oscillator = ctx.createOscillator();
+    const gainNode = ctx.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(ctx.destination);
+    
+    oscillator.frequency.value = frequency;
+    oscillator.type = 'sine';
+    
+    const startTime = ctx.currentTime + delay;
+    gainNode.gain.setValueAtTime(0, startTime);
+    gainNode.gain.linearRampToValueAtTime(0.15, startTime + 0.1);
+    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+    
+    oscillator.start(startTime);
+    oscillator.stop(startTime + duration);
   };
+
+  const playSadMelody = (notes: number[]) => {
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContext();
+    }
+    
+    // Play initial melody
+    notes.forEach((note, index) => {
+      playNote(note, 0.8, index * 0.6);
+    });
+
+    // Loop the melody
+    intervalRef.current = setInterval(() => {
+      if (audioContextRef.current) {
+        notes.forEach((note, index) => {
+          playNote(note, 0.8, index * 0.6);
+        });
+      }
+    }, notes.length * 600 + 500);
+  };
+
+  const stopMusic = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  const togglePlay = () => {
+    if (isPlaying) {
+      stopMusic();
+      setIsPlaying(false);
+    } else {
+      const randomSong = sadSongs[Math.floor(Math.random() * sadSongs.length)];
+      setCurrentSong(randomSong);
+      playSadMelody(randomSong.notes);
+      setIsPlaying(true);
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      stopMusic();
+      if (audioContextRef.current) {
+        audioContextRef.current.close();
+      }
+    };
+  }, []);
 
   return (
     <motion.div
@@ -44,7 +110,7 @@ export const CryPlaylist = () => {
           </div>
         </div>
         <Button
-          onClick={playSadSong}
+          onClick={togglePlay}
           size="icon"
           className="kawaii-btn rounded-full w-12 h-12 bg-gradient-to-r from-secondary to-kawaii-lavender"
         >
@@ -81,7 +147,7 @@ export const CryPlaylist = () => {
                 </div>
               </div>
               <p className="text-xs text-muted-foreground mt-3 italic text-center">
-                🎵 Playing imaginary sad songs... 🎵
+                {isPlaying ? '🎵 Playing sad melodies... 🎵' : '🎵 Paused 🎵'}
               </p>
             </div>
           </motion.div>
