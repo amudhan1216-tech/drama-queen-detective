@@ -7,16 +7,14 @@ const floatingEmojis = ['💕', '✨', '🌸', '🎀', '☁️', '🦋', '💫',
 
 const Index = () => {
   const navigate = useNavigate();
-  const [stage, setStage] = useState(0); // 0: initial, 1: text1, 2: text2, 3: teddy, 4: redirect
+  const [stage, setStage] = useState(0); // 0: initial, 1: hi gurls pop, 2: subtitle, 3: teddy, 4: redirect
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    // Check if user is already logged in
     const checkAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // User is logged in, check if they completed quiz
         const { data: preferences } = await supabase
           .from('user_preferences')
           .select('completed_at')
@@ -32,7 +30,6 @@ const Index = () => {
       }
 
       setIsCheckingAuth(false);
-      // Start animation sequence
       startAnimations();
     };
 
@@ -40,13 +37,9 @@ const Index = () => {
   }, [navigate]);
 
   const startAnimations = () => {
-    // Stage 1: First text appears
-    setTimeout(() => setStage(1), 500);
-    // Stage 2: Second text
+    setTimeout(() => setStage(1), 300);
     setTimeout(() => setStage(2), 2000);
-    // Stage 3: Teddy appears
     setTimeout(() => setStage(3), 3500);
-    // Stage 4: Redirect to auth
     setTimeout(() => {
       setStage(4);
       navigate('/auth');
@@ -80,14 +73,14 @@ const Index = () => {
           key={i}
           className="fixed text-3xl md:text-4xl opacity-30 pointer-events-none"
           initial={{ 
-            x: Math.random() * window.innerWidth,
-            y: window.innerHeight + 100,
+            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 800),
+            y: (typeof window !== 'undefined' ? window.innerHeight : 600) + 100,
             rotate: 0
           }}
           animate={{ 
             y: -100,
             rotate: 360,
-            x: Math.random() * window.innerWidth
+            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 800)
           }}
           transition={{ 
             duration: 8 + Math.random() * 5,
@@ -106,8 +99,8 @@ const Index = () => {
           key={`sparkle-${i}`}
           className="fixed w-2 h-2 rounded-full bg-gradient-to-r from-pink-400 to-purple-400 pointer-events-none"
           initial={{ 
-            x: Math.random() * window.innerWidth,
-            y: Math.random() * window.innerHeight,
+            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 800),
+            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 600),
             scale: 0,
             opacity: 0
           }}
@@ -127,46 +120,82 @@ const Index = () => {
       {/* Main content */}
       <div className="relative z-10 text-center px-6">
         <AnimatePresence mode="wait">
-          {/* Stage 1: Welcome text */}
+          {/* Stage 1: HI GURLS - Big Pop Animation */}
           {stage >= 1 && stage < 4 && (
             <motion.div
-              initial={{ opacity: 0, y: 30, scale: 0.8 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
+              initial={{ opacity: 0, scale: 0 }}
+              animate={{ opacity: 1, scale: [0, 1.3, 1] }}
+              transition={{ 
+                duration: 0.8, 
+                ease: [0.34, 1.56, 0.64, 1], // Bouncy spring
+                scale: { times: [0, 0.6, 1] }
+              }}
               className="mb-8"
             >
               <motion.h1 
-                className="text-4xl md:text-6xl lg:text-7xl font-bold"
+                className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight"
+                animate={{ 
+                  rotate: [0, -3, 3, -2, 2, 0],
+                  scale: [1, 1.02, 1]
+                }}
+                transition={{ 
+                  duration: 0.5,
+                  delay: 0.8
+                }}
                 style={{
-                  background: 'linear-gradient(135deg, hsl(340 82% 55%) 0%, hsl(280 60% 60%) 50%, hsl(200 80% 60%) 100%)',
+                  background: 'linear-gradient(135deg, hsl(340 90% 60%) 0%, hsl(300 70% 55%) 30%, hsl(280 80% 60%) 60%, hsl(200 90% 55%) 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text'
+                  backgroundClip: 'text',
+                  textShadow: '0 0 60px hsla(340, 80%, 60%, 0.4)'
                 }}
               >
-                Hey Girlie! 💕
+                HI GURLS! 💕
               </motion.h1>
+              
+              {/* Exploding emojis around text */}
+              {['✨', '💖', '🌸', '🎀', '💗', '☁️', '🦋', '💫'].map((emoji, i) => (
+                <motion.span
+                  key={i}
+                  className="absolute text-3xl md:text-4xl"
+                  initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
+                  animate={{ 
+                    opacity: [0, 1, 1, 0],
+                    scale: [0, 1.5, 1.2, 0],
+                    x: Math.cos((i / 8) * Math.PI * 2) * 180,
+                    y: Math.sin((i / 8) * Math.PI * 2) * 120
+                  }}
+                  transition={{ 
+                    duration: 1.5,
+                    delay: 0.3 + i * 0.08,
+                    ease: 'easeOut'
+                  }}
+                  style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
+                >
+                  {emoji}
+                </motion.span>
+              ))}
               
               <motion.div
                 initial={{ opacity: 0, scale: 0 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3, duration: 0.5 }}
-                className="flex justify-center gap-2 mt-4"
+                transition={{ delay: 0.5, duration: 0.5 }}
+                className="flex justify-center gap-3 mt-6"
               >
                 {['🌸', '✨', '💗', '✨', '🌸'].map((emoji, i) => (
                   <motion.span
                     key={i}
                     animate={{ 
-                      y: [0, -10, 0],
-                      scale: [1, 1.2, 1]
+                      y: [0, -15, 0],
+                      scale: [1, 1.3, 1],
+                      rotate: [0, 10, -10, 0]
                     }}
                     transition={{ 
-                      duration: 1.5,
-                      delay: i * 0.1,
+                      duration: 1.2,
+                      delay: i * 0.12,
                       repeat: Infinity
                     }}
-                    className="text-2xl md:text-3xl"
+                    className="text-2xl md:text-4xl"
                   >
                     {emoji}
                   </motion.span>
@@ -175,24 +204,24 @@ const Index = () => {
             </motion.div>
           )}
 
-          {/* Stage 2: Subtitle */}
+          {/* Stage 2: Subtitle with pop */}
           {stage >= 2 && stage < 4 && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
+              initial={{ opacity: 0, y: 30, scale: 0.8 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
               className="mb-12"
             >
-              <p className="text-xl md:text-2xl text-foreground/80 font-medium">
-                Your cute mood companion is here 🎀
+              <p className="text-xl md:text-2xl text-foreground/80 font-semibold">
+                Your cute mood companion is loading... 🎀
               </p>
               <motion.p 
                 className="text-lg text-muted-foreground mt-2"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.4 }}
               >
-                Let's discover your vibe together ✨
+                Get ready to vibe ✨
               </motion.p>
             </motion.div>
           )}
@@ -200,7 +229,7 @@ const Index = () => {
           {/* Stage 3: Big animated teddy */}
           {stage >= 3 && stage < 4 && (
             <motion.div
-              initial={{ opacity: 0, scale: 0, rotate: -20 }}
+              initial={{ opacity: 0, scale: 0, rotate: -30 }}
               animate={{ 
                 opacity: 1, 
                 scale: 1, 
@@ -209,6 +238,7 @@ const Index = () => {
               }}
               transition={{ 
                 duration: 0.8,
+                ease: [0.34, 1.56, 0.64, 1],
                 y: { duration: 2, repeat: Infinity, ease: 'easeInOut' }
               }}
               className="relative"
@@ -217,38 +247,38 @@ const Index = () => {
               <motion.div
                 className="absolute inset-0 flex items-center justify-center"
                 animate={{ 
-                  scale: [1, 1.2, 1],
-                  opacity: [0.3, 0.6, 0.3]
+                  scale: [1, 1.3, 1],
+                  opacity: [0.4, 0.7, 0.4]
                 }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
                 <div 
-                  className="w-48 h-48 md:w-64 md:h-64 rounded-full blur-3xl"
-                  style={{ background: 'radial-gradient(circle, hsl(340 82% 65% / 0.5) 0%, transparent 70%)' }}
+                  className="w-52 h-52 md:w-72 md:h-72 rounded-full blur-3xl"
+                  style={{ background: 'radial-gradient(circle, hsl(340 90% 70% / 0.6) 0%, hsl(280 70% 60% / 0.3) 50%, transparent 70%)' }}
                 />
               </motion.div>
 
               {/* Teddy emoji */}
               <motion.span 
-                className="text-[8rem] md:text-[12rem] lg:text-[14rem] block relative z-10"
+                className="text-[10rem] md:text-[14rem] lg:text-[16rem] block relative z-10"
                 animate={{ 
-                  rotate: [-5, 5, -5],
+                  rotate: [-8, 8, -8],
                 }}
                 transition={{ 
-                  duration: 2,
+                  duration: 1.5,
                   repeat: Infinity,
                   ease: 'easeInOut'
                 }}
                 style={{ 
                   fontFamily: '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif',
-                  filter: 'drop-shadow(0 20px 40px rgba(0,0,0,0.1))'
+                  filter: 'drop-shadow(0 25px 50px rgba(0,0,0,0.15))'
                 }}
               >
                 🧸
               </motion.span>
 
               {/* Hearts around teddy */}
-              {['💕', '🤍', '✨', '💗', '☁️', '🌷'].map((emoji, i) => (
+              {['💕', '🤍', '✨', '💗', '☁️', '🌷', '💖', '🎀'].map((emoji, i) => (
                 <motion.span
                   key={i}
                   className="absolute text-3xl md:text-4xl"
@@ -256,14 +286,14 @@ const Index = () => {
                   animate={{ 
                     opacity: [0, 1, 0],
                     scale: [0, 1.5, 0],
-                    x: Math.cos((i / 6) * Math.PI * 2) * 150,
-                    y: Math.sin((i / 6) * Math.PI * 2) * 150 - 50
+                    x: Math.cos((i / 8) * Math.PI * 2) * 160,
+                    y: Math.sin((i / 8) * Math.PI * 2) * 160 - 50
                   }}
                   transition={{ 
                     duration: 2,
-                    delay: i * 0.2,
+                    delay: i * 0.15,
                     repeat: Infinity,
-                    repeatDelay: 1
+                    repeatDelay: 0.5
                   }}
                   style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
                 >
@@ -276,11 +306,11 @@ const Index = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-lg text-muted-foreground mt-8"
+                className="text-lg text-muted-foreground mt-8 font-medium"
               >
                 <motion.span
-                  animate={{ opacity: [1, 0.3, 1] }}
-                  transition={{ duration: 1.5, repeat: Infinity }}
+                  animate={{ opacity: [1, 0.4, 1] }}
+                  transition={{ duration: 1.2, repeat: Infinity }}
                 >
                   Opening the door for you...
                 </motion.span>
@@ -295,7 +325,7 @@ const Index = () => {
         className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
+        transition={{ delay: 0.8 }}
       >
         <svg viewBox="0 0 1440 120" className="w-full h-full" preserveAspectRatio="none">
           <motion.path

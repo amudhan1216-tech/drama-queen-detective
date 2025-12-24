@@ -38,23 +38,145 @@ const playChime = (freq = 523, dur = 0.4) => {
 
 const CuteBottle = ({ filledEmojis }: { filledEmojis: typeof moodEmojis }) => {
   const fill = (filledEmojis.length / 5) * 100;
+  
+  // Create gradient stops based on mood colors
+  const gradientStops = filledEmojis.length > 0 
+    ? filledEmojis.map((e, i) => {
+        const offset = filledEmojis.length === 1 
+          ? 50 
+          : (i / (filledEmojis.length - 1)) * 100;
+        return { offset, color: e.color };
+      })
+    : [{ offset: 50, color: '#FFD93D' }];
+
   return (
-    <div className="relative w-44 h-64 mx-auto">
+    <div className="relative w-48 h-72 mx-auto">
       <svg viewBox="0 0 100 150" className="w-full h-full">
         <defs>
-          <clipPath id="jar"><path d="M15 35 Q15 45 20 50 L20 130 Q20 140 35 140 L65 140 Q80 140 80 130 L80 50 Q85 45 85 35 L85 30 Q85 25 80 25 L20 25 Q15 25 15 30 Z" /></clipPath>
-          <linearGradient id="fill" x1="0%" y1="100%" x2="0%" y2="0%">{filledEmojis.map((e, i) => <stop key={i} offset={`${(i / Math.max(filledEmojis.length - 1, 1)) * 100}%`} stopColor={e.color} stopOpacity="0.7" />)}</linearGradient>
+          <clipPath id="jar">
+            <path d="M15 35 Q15 45 20 50 L20 130 Q20 140 35 140 L65 140 Q80 140 80 130 L80 50 Q85 45 85 35 L85 30 Q85 25 80 25 L20 25 Q15 25 15 30 Z" />
+          </clipPath>
+          <linearGradient id="moodFill" x1="0%" y1="100%" x2="0%" y2="0%">
+            {gradientStops.map((stop, i) => (
+              <stop key={i} offset={`${stop.offset}%`} stopColor={stop.color} stopOpacity="0.8" />
+            ))}
+          </linearGradient>
+          {/* Glow filter for the liquid */}
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
         </defs>
-        <g clipPath="url(#jar)"><rect x="0" y="0" width="100" height="150" fill="rgba(255,255,255,0.3)" />
-          <motion.rect x="15" y={140 - fill * 1.1} width="70" height={fill * 1.1} initial={{ height: 0, y: 140 }} animate={{ height: fill * 1.1, y: 140 - fill * 1.1 }} transition={{ duration: 0.5 }} fill="url(#fill)" /></g>
+        
+        {/* Jar background */}
+        <g clipPath="url(#jar)">
+          <rect x="0" y="0" width="100" height="150" fill="rgba(255,255,255,0.4)" />
+          
+          {/* Animated mood liquid with color */}
+          <motion.rect 
+            x="15" 
+            width="70" 
+            initial={{ height: 0, y: 140 }} 
+            animate={{ height: fill * 1.1, y: 140 - fill * 1.1 }} 
+            transition={{ duration: 0.6, ease: "easeOut" }} 
+            fill="url(#moodFill)"
+            filter="url(#glow)"
+          />
+          
+          {/* Bubbles in liquid */}
+          {filledEmojis.length > 0 && [...Array(5)].map((_, i) => (
+            <motion.circle
+              key={i}
+              cx={25 + i * 12}
+              r={2 + Math.random() * 2}
+              fill="rgba(255,255,255,0.6)"
+              initial={{ cy: 140 }}
+              animate={{ 
+                cy: [140, 140 - fill * 1.1 + 10],
+                opacity: [0, 0.8, 0]
+              }}
+              transition={{
+                duration: 2 + Math.random(),
+                repeat: Infinity,
+                delay: i * 0.4,
+                ease: "easeOut"
+              }}
+            />
+          ))}
+        </g>
+        
+        {/* Jar outline */}
         <path d="M15 35 Q15 45 20 50 L20 130 Q20 140 35 140 L65 140 Q80 140 80 130 L80 50 Q85 45 85 35 L85 30 Q85 25 80 25 L20 25 Q15 25 15 30 Z" fill="none" stroke="hsl(340 30% 75%)" strokeWidth="3" />
+        
+        {/* Lid */}
         <rect x="18" y="15" width="64" height="12" rx="3" fill="hsl(340 40% 85%)" stroke="hsl(340 30% 70%)" strokeWidth="2" />
         <ellipse cx="50" cy="12" rx="12" ry="5" fill="none" stroke="hsl(340 30% 70%)" strokeWidth="2" />
-        <g transform="translate(50, 28)"><ellipse cx="-8" cy="0" rx="6" ry="4" fill="hsl(340 70% 75%)" /><ellipse cx="8" cy="0" rx="6" ry="4" fill="hsl(340 70% 75%)" /><circle cx="0" cy="0" r="3" fill="hsl(340 80% 65%)" /></g>
-        <path d="M25 50 L25 120" stroke="rgba(255,255,255,0.5)" strokeWidth="3" strokeLinecap="round" />
+        
+        {/* Cute bow on lid */}
+        <g transform="translate(50, 28)">
+          <ellipse cx="-8" cy="0" rx="6" ry="4" fill="hsl(340 70% 75%)" />
+          <ellipse cx="8" cy="0" rx="6" ry="4" fill="hsl(340 70% 75%)" />
+          <circle cx="0" cy="0" r="3" fill="hsl(340 80% 65%)" />
+        </g>
+        
+        {/* Glass reflection */}
+        <path d="M25 50 L25 120" stroke="rgba(255,255,255,0.6)" strokeWidth="4" strokeLinecap="round" />
       </svg>
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">{filledEmojis.map((e, i) => <motion.span key={i} className="absolute text-2xl" initial={{ opacity: 0, y: 50, scale: 0 }} animate={{ opacity: 1, y: 120 - i * 22, x: 55 + Math.sin(i * 2) * 20, scale: 1, rotate: Math.random() * 30 - 15 }} transition={{ delay: 0.1, duration: 0.4 }}>{e.emoji}</motion.span>)}</div>
-      {filledEmojis.length === 5 && [...Array(5)].map((_, i) => <motion.span key={i} className="absolute text-sm" style={{ left: `${20 + i * 15}%`, top: `${10 + (i % 3) * 20}%` }} animate={{ opacity: [0, 1, 0], scale: [0.5, 1.2, 0.5] }} transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}>✨</motion.span>)}
+      
+      {/* Floating emojis inside bottle */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {filledEmojis.map((e, i) => (
+          <motion.div
+            key={i}
+            className="absolute text-2xl"
+            initial={{ opacity: 0, y: 60, scale: 0 }}
+            animate={{ 
+              opacity: 1, 
+              y: 130 - i * 24, 
+              x: 60 + Math.sin(i * 2) * 22, 
+              scale: 1, 
+              rotate: Math.random() * 30 - 15 
+            }}
+            transition={{ delay: 0.1, duration: 0.5, ease: "backOut" }}
+          >
+            {e.emoji}
+            {/* Color glow behind emoji */}
+            <motion.div
+              className="absolute inset-0 rounded-full blur-md -z-10"
+              style={{ backgroundColor: e.color, opacity: 0.4 }}
+              animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.5, 0.3] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+          </motion.div>
+        ))}
+      </div>
+      
+      {/* Sparkles when full */}
+      {filledEmojis.length === 5 && [...Array(8)].map((_, i) => (
+        <motion.span 
+          key={i} 
+          className="absolute text-lg"
+          style={{ 
+            left: `${15 + i * 10}%`, 
+            top: `${5 + (i % 4) * 15}%` 
+          }}
+          animate={{ 
+            opacity: [0, 1, 0], 
+            scale: [0.5, 1.3, 0.5],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ 
+            duration: 1.5, 
+            repeat: Infinity, 
+            delay: i * 0.15 
+          }}
+        >
+          ✨
+        </motion.span>
+      ))}
     </div>
   );
 };
