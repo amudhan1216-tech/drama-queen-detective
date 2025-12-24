@@ -108,20 +108,19 @@ const Home = () => {
           {/* CENTER & RIGHT: Features */}
           <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-4">
             <DelusionSlider value={delusionLevel} onChange={setDelusionLevel} />
-            <BestieMode isEnabled={isBestieMode} onToggle={setIsBestieMode} />
-            <OverthinkingGenerator delusionLevel={delusionLevel} isBestieMode={isBestieMode} />
+            <BestieMode enabled={isBestieMode} onToggle={setIsBestieMode} />
+            <OverthinkingGenerator delusionLevel={delusionLevel} bestieMode={isBestieMode} />
             <MoodDetector />
             <SeenPanicTimer />
             <ScreenshotAnalyzer />
             <LateNightMode onModeChange={setIsLateNight} />
             <CryPlaylist />
-            <DailyAffirmation />
-            <ShareableCard delusionLevel={delusionLevel} />
+            <ShareableCard />
           </div>
         </div>
       </main>
 
-      <DailyAffirmation showPopup />
+      <DailyAffirmation />
     </div>
   );
 };
