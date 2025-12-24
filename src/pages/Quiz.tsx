@@ -212,7 +212,7 @@ const Quiz = () => {
         description: "Let's check out your personalized suggestions!"
       });
 
-      navigate('/suggestions');
+      navigate('/home');
     } catch (error) {
       toast({
         title: "Oops! 😿",

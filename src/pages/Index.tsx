@@ -24,7 +24,7 @@ const Index = () => {
           .maybeSingle();
 
         if (preferences?.completed_at) {
-          navigate('/mood');
+          navigate('/home');
         } else {
           navigate('/quiz');
         }
